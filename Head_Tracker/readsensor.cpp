@@ -13,7 +13,7 @@ void ReadSensor::start()
     QList<QSerialPortInfo> listOfPorts = QSerialPortInfo::availablePorts();
 
     foreach(QSerialPortInfo port, listOfPorts) {
-
+        emit logSig(QString("PID: %1 - Manuf: %2").arg(port.productIdentifier()).arg(port.manufacturer()));
         if (port.productIdentifier() == 24577) {
             sp = new QSerialPort(port, this);
             portFound = true;
@@ -119,24 +119,38 @@ void ReadSensor::start()
         QByteArray data = sp->read(NUM_READ_BYTES);
 
         if (!dataAvail || (data.size() < NUM_READ_BYTES) ){
+            sp->clear();
             QString errMsg = QString("WARNING: Could not read sensor data: Avail=%1 - Size=%2").arg(dataAvail).arg(data.size());
             emit logSig(errMsg);
             continue;
         }
 
+        // Headers
+        quint8 pktCnter = data.at(1);   // Packet Counter
+
         // accelerometer
-        quint16 accelX = data.at(4)*qPow(2,8) + data.at(5);
-        quint16 accelY = data.at(6)*qPow(2,8) + data.at(7);
-        quint16 accelZ = data.at(8)*qPow(2,8) + data.at(9);
+        quint16 rawAccelX = data.at(4)*qPow(2,8) + data.at(5);
+        quint16 rawAccelY = data.at(6)*qPow(2,8) + data.at(7);
+        quint16 rawAccelZ = data.at(8)*qPow(2,8) + data.at(9);
+
+        double accelX = 2.0 * (rawAccelX - 32768) / 32768.0;
+        double accelY = 2.0 * (rawAccelY - 32768) / 32768.0;
+        double accelZ = 2.0 * (rawAccelZ - 32768) / 32768.0;
 
         // gyroscope
-        quint16 gyroX = data.at(16)*qPow(2,8) + data.at(17);
-        quint16 gyroY = data.at(18)*qPow(2,8) + data.at(19);
-        quint16 gyroZ = data.at(20)*qPow(2,8) + data.at(21);
+        quint16 rawGyroX = data.at(16)*qPow(2,8) + data.at(17);
+        quint16 rawGyroY = data.at(18)*qPow(2,8) + data.at(19);
+        quint16 rawGyroZ = data.at(20)*qPow(2,8) + data.at(21);
 
-        emit logSig(QString("Accel [ %1 %2 %3 ] - Gyro [ %4 %5 %6 ]")
+        double gyroX = 250.0 * (rawGyroX - 32768) / 32768.0;
+        double gyroY = 250.0 * (rawGyroY - 32768) / 32768.0;
+        double gyroZ = 250.0 * (rawGyroZ - 32768) / 32768.0;
+
+        // Display normalized values
+        emit logSig(QString("Packet %7: Accel [ %1 %2 %3 ] - Gyro [ %4 %5 %6 ]")
                     .arg(accelX).arg(accelY).arg(accelZ)
-                    .arg(gyroX).arg(gyroY).arg(gyroZ));
+                    .arg(gyroX).arg(gyroY).arg(gyroZ)
+                    .arg(pktCnter));
 
     }
 

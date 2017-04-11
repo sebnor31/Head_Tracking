@@ -2,9 +2,10 @@ clc
 clear all;
 close all;
 
+comPort = 'COM79';
 data1 = [204 204 3 232 1 0];
 
-s_wr = serial('COM78','BaudRate',921600,'DataBits',8, 'Parity', 'none', 'StopBits', 1, 'InputBufferSize', 1);
+s_wr = serial(comPort,'BaudRate',921600,'DataBits',8, 'Parity', 'none', 'StopBits', 1, 'InputBufferSize', 1);
 connected = 0;
 fopen (s_wr);
 while (connected ~= 1)
@@ -43,7 +44,7 @@ byte_read = 28;
 % mouse_cursor = Robot;
 
 data3 = [170 170 15 255 15 255];
-s_wr = serial('COM78','BaudRate',921600,'DataBits',8, 'Parity', 'none', 'StopBits', 1, 'InputBufferSize',byte_read);
+s_wr = serial(comPort,'BaudRate',921600,'DataBits',8, 'Parity', 'none', 'StopBits', 1, 'InputBufferSize',byte_read);
 fopen(s_wr);
 
 
