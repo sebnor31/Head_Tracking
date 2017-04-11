@@ -1,5 +1,6 @@
 #include "readsensor.h"
 #include <QtMath>
+#include <QDateTime>
 
 ReadSensor::ReadSensor(QObject *parent) : QObject(parent)
 {
@@ -96,6 +97,8 @@ void ReadSensor::start()
     fetchCmd[4] = static_cast<quint8>(0x0F);
     fetchCmd[5] = static_cast<quint8>(0xFF);
 
+    qint64 basetime = QDateTime::currentMSecsSinceEpoch();
+
     while (!stopCond) {
 
         // Send Fetch Command
@@ -147,13 +150,22 @@ void ReadSensor::start()
         double gyroZ = 250.0 * (rawGyroZ - 32768) / 32768.0;
 
         // Display normalized values
+        SensorData sensorData;
+        sensorData.accelX = accelX;
+        sensorData.accelY = accelY;
+        sensorData.accelZ = accelZ;
+        sensorData.gyroX = gyroX;
+        sensorData.gyroY = gyroY;
+        sensorData.gyroZ = gyroZ;
+        sensorData.pktCnter = pktCnter;
+        sensorData.time = (QDateTime::currentMSecsSinceEpoch() - basetime) / 1000.0;
+        emit newDataSig(sensorData);
+
         emit logSig(QString("Packet %7: Accel [ %1 %2 %3 ] - Gyro [ %4 %5 %6 ]")
                     .arg(accelX).arg(accelY).arg(accelZ)
                     .arg(gyroX).arg(gyroY).arg(gyroZ)
                     .arg(pktCnter));
-
     }
-
 }
 
 void ReadSensor::checkError(bool settingSuccess)

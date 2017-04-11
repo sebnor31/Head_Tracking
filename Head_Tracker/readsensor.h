@@ -6,6 +6,7 @@
 #include <QSerialPort>
 #include <QPointer>
 #include <QMutex>
+#include "typedef.h"
 
 class ReadSensor : public QObject
 {
@@ -27,6 +28,7 @@ public slots:
     void stop();
 
 signals:
+    void newDataSig(SensorData);
     void logSig(QString);
     void checkErrorSig(bool);
 };
