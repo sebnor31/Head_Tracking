@@ -15,8 +15,9 @@ MainWindow::MainWindow(QWidget *parent) : QMainWindow(parent), ui(new Ui::MainWi
 
     connect(rsTh, &QThread::started, rs, &ReadSensor::start);
     connect(rs, &ReadSensor::logSig, this, &MainWindow::logMsg);
-    connect(rsTh, &QThread::finished, rs, &ReadSensor::deleteLater);
+    connect(this, &MainWindow::finished, rs, &ReadSensor::stop, Qt::DirectConnection);
     connect(rsTh, &QThread::finished, rsTh, &QThread::deleteLater);
+    connect(rsTh, &QThread::finished, rs, &ReadSensor::deleteLater);
 
     rsTh->start();
 }
@@ -28,6 +29,7 @@ void MainWindow::logMsg(QString msg){
 
 void MainWindow::closeEvent(QCloseEvent *event){
     event->ignore();
+    emit finished();
 
     rsTh->quit();
     rsTh->wait();

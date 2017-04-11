@@ -29,6 +29,7 @@ private slots:
 
 signals:
     void logSig(QString);
+    void finished();
 };
 
 #endif // MAINWINDOW_H
