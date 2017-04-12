@@ -165,10 +165,10 @@ void ReadSensor::start()
         sensorData.time = (QDateTime::currentMSecsSinceEpoch() - basetime) / 1000.0;
         emit newDataSig(sensorData);
 
-        emit logSig(QString("Pkt %7 (%8): Accel [ %1 %2 %3 ] - Gyro [ %4 %5 %6 ]")
-                    .arg(accelX).arg(accelY).arg(accelZ)
-                    .arg(gyroX).arg(gyroY).arg(gyroZ)
-                    .arg(pktCnter).arg(sensorData.time));
+//        emit logSig(QString("Pkt %7 (%8): Accel [ %1 %2 %3 ] - Gyro [ %4 %5 %6 ]")
+//                    .arg(accelX).arg(accelY).arg(accelZ)
+//                    .arg(gyroX).arg(gyroY).arg(gyroZ)
+//                    .arg(pktCnter).arg(sensorData.time));
     }
 }
 

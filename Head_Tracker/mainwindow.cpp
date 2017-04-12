@@ -2,7 +2,10 @@
 #include "ui_mainwindow.h"
 
 #include <QDebug>
+#include <QFileDialog>
 #include <QMessageBox>
+#include <QDir>
+#include "calibration.h"
 
 
 MainWindow::MainWindow(QWidget *parent) : QMainWindow(parent), ui(new Ui::MainWindow)
@@ -132,4 +135,35 @@ void MainWindow::updatePlot(SensorData data)
 
     ui->sensorPlot->replot();
 
+}
+
+void MainWindow::on_calibBtn_clicked()
+{
+    QFileDialog dialog(this);
+    dialog.setFileMode(QFileDialog::DirectoryOnly);
+    dialog.setOption(QFileDialog::ShowDirsOnly, true);
+    dialog.setDirectory(QCoreApplication::applicationDirPath());
+    dialog.exec();
+
+    QDir dir = dialog.directory();
+    QString calibFn = dir.absolutePath() + "/calib.txt";
+
+    QMessageBox::information(this, "Calib", "Put the headset in up-right position");
+
+    QThread *calibTh = new QThread(this);
+    Calib *calib = new Calib(rs, calibFn);
+    calib->moveToThread(calibTh);
+
+    connect(calibTh, &QThread::started, calib, &Calib::start);
+    connect(calib, &Calib::finished, this, &MainWindow::calibDone);
+    connect(calib, &Calib::finished, calibTh, &QThread::quit);
+    connect(calib, &Calib::finished, calib, &Calib::deleteLater);
+    connect(calibTh, &QThread::finished, calibTh, &QThread::deleteLater);
+
+    calibTh->start();
+}
+
+void MainWindow::calibDone()
+{
+    QMessageBox::information(this, "Calib Done", "Calibration is done!!");
 }

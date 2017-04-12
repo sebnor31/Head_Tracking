@@ -14,7 +14,7 @@
    <string>MainWindow</string>
   </property>
   <widget class="QWidget" name="centralWidget">
-   <layout class="QVBoxLayout" name="verticalLayout" stretch="5,2">
+   <layout class="QVBoxLayout" name="verticalLayout" stretch="5,1">
     <item>
      <widget class="QCustomPlot" name="sensorPlot" native="true">
       <property name="autoFillBackground">
@@ -23,7 +23,24 @@
      </widget>
     </item>
     <item>
-     <widget class="QPlainTextEdit" name="logger"/>
+     <layout class="QHBoxLayout" name="horizontalLayout">
+      <item>
+       <widget class="QPlainTextEdit" name="logger"/>
+      </item>
+      <item>
+       <widget class="QPushButton" name="calibBtn">
+        <property name="sizePolicy">
+         <sizepolicy hsizetype="Minimum" vsizetype="Preferred">
+          <horstretch>0</horstretch>
+          <verstretch>0</verstretch>
+         </sizepolicy>
+        </property>
+        <property name="text">
+         <string>Calibration</string>
+        </property>
+       </widget>
+      </item>
+     </layout>
     </item>
    </layout>
   </widget>

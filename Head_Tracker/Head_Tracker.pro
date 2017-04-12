@@ -12,11 +12,13 @@ TEMPLATE = app
 SOURCES += main.cpp\
         mainwindow.cpp \
     readsensor.cpp \
-    qcustomplot.cpp
+    qcustomplot.cpp \
+    calibration.cpp
 
 HEADERS  += mainwindow.h \
     readsensor.h \
     qcustomplot.h \
-    typedef.h
+    typedef.h \
+    calibration.h
 
 FORMS    += mainwindow.ui
