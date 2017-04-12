@@ -1,6 +1,7 @@
 #include "readsensor.h"
 #include <QtMath>
 #include <QDateTime>
+#include <QThread>
 
 ReadSensor::ReadSensor(QObject *parent) : QObject(parent)
 {
@@ -101,6 +102,8 @@ void ReadSensor::start()
 
     while (!stopCond) {
 
+        QThread::msleep(20);    // Give time for a new sample to be received
+
         // Send Fetch Command
         qint64 numBytes = sp->write(fetchCmd);
         bool dataWritten = sp->waitForBytesWritten(100);
@@ -118,13 +121,14 @@ void ReadSensor::start()
         }
 
         // Read sensor values
-        bool dataAvail = sp->waitForReadyRead(1000);
+        bool dataAvail = true;
         QByteArray data = sp->read(NUM_READ_BYTES);
 
         if (!dataAvail || (data.size() < NUM_READ_BYTES) ){
             sp->clear();
             QString errMsg = QString("WARNING: Could not read sensor data: Avail=%1 - Size=%2").arg(dataAvail).arg(data.size());
             emit logSig(errMsg);
+
             continue;
         }
 
@@ -161,10 +165,10 @@ void ReadSensor::start()
         sensorData.time = (QDateTime::currentMSecsSinceEpoch() - basetime) / 1000.0;
         emit newDataSig(sensorData);
 
-        emit logSig(QString("Packet %7: Accel [ %1 %2 %3 ] - Gyro [ %4 %5 %6 ]")
+        emit logSig(QString("Pkt %7 (%8): Accel [ %1 %2 %3 ] - Gyro [ %4 %5 %6 ]")
                     .arg(accelX).arg(accelY).arg(accelZ)
                     .arg(gyroX).arg(gyroY).arg(gyroZ)
-                    .arg(pktCnter));
+                    .arg(pktCnter).arg(sensorData.time));
     }
 }
 
