@@ -19,11 +19,14 @@ Calib::Calib(ReadSensor *rs, QWidget *parent) : QDialog(parent), ui(new Ui::Cali
     const int numCols = 6 * numSamples; // 6-pt tumble calibration (3 axis * 2 directions)
     colIdx = 0;
 
-    accelMeas = Mat_<double>::zeros(3,numCols); // Actual measurements
-    accelReal = Mat_<double>::zeros(4,numCols); // Desired/Real measurement values
-    currAccelState = Mat_<double>::zeros(3,1);  // Real mesurement values for current calib point (last row of 1's is added later on)
+    accelMeas       = Mat_<double>::zeros(3,numCols); // Actual measurements
+    gyroMeas        = Mat_<double>::zeros(3,numCols);
+    accelReal       = Mat_<double>::zeros(4,numCols); // Desired/Real measurement values
+    gyroReal        = Mat_<double>::zeros(4,numCols);
+    currAccelState  = Mat_<double>::zeros(3,1);       // Real mesurement values for current calib point (last row of 1's is added later on)
+    currGyroState   = Mat_<double>::zeros(3,1);
 
-    ui->saveBtn->setEnabled(false);             // Enable save btn when all points are recorded
+    ui->saveBtn->setEnabled(false); // Enable save btn when all points are recorded
 }
 
 void Calib::on_xUpBtn_clicked()
@@ -134,19 +137,29 @@ void Calib::on_saveBtn_clicked()
 {
     // Estimate the Gain and Offset for each axis
     Mat_<double> A = accelReal * accelReal.t();
-    Mat_<double> gain_offset = accelMeas * accelReal.t() * A.inv();
+    Mat_<double> accelGainOffset = accelMeas * accelReal.t() * A.inv();
 
     // Separate Gain and Offset
     Rect gainROI(0,0,3,3);
     Rect offsetROI(3,0,1,3);
 
-    Mat gain = gain_offset(gainROI);
-    Mat offset = gain_offset(offsetROI);
+    Mat gain = accelGainOffset(gainROI);
+    Mat offset = accelGainOffset(offsetROI);
 
     emit logSig("gain");
     printMat(gain);
     emit logSig("offset");
     printMat(offset);
+
+    /**********************************
+     * TODO: Estimate Gain+Offset for Gyro
+     * *********************************/
+    Mat_<double> gyroGainOffset = Mat_<double>::zeros(3,4);
+    gyroGainOffset(0,0) = 1.0;
+    gyroGainOffset(1,1) = 1.0;
+    gyroGainOffset(2,2) = 1.0;
+
+    /*************************************/
 
     // Save gain+offset to file
     QFile calibFile(ui->savePathEdit->text());
@@ -157,9 +170,12 @@ void Calib::on_saveBtn_clicked()
 
     }
     else {
-        out << gain_offset(0,0) << "," << gain_offset(0,1) << "," << gain_offset(0,2) << "," << gain_offset(0,3) << "\n"
-            << gain_offset(1,0) << "," << gain_offset(1,1) << "," << gain_offset(1,2) << "," << gain_offset(1,3) << "\n"
-            << gain_offset(2,0) << "," << gain_offset(2,1) << "," << gain_offset(2,2) << "," << gain_offset(2,3) << "\n";
+        out << accelGainOffset(0,0) << "," << accelGainOffset(0,1)  << "," << accelGainOffset(0,2)  << "," << accelGainOffset(0,3)  << ","
+            << gyroGainOffset(0,0)  << "," << gyroGainOffset(0,1)   << "," << gyroGainOffset(0,2)   << "," << gyroGainOffset(0,3)   << "\n"
+            << accelGainOffset(1,0) << "," << accelGainOffset(1,1)  << "," << accelGainOffset(1,2)  << "," << accelGainOffset(1,3)  << ","
+            << gyroGainOffset(1,0)  << "," << gyroGainOffset(1,1)   << "," << gyroGainOffset(1,2)   << "," << gyroGainOffset(1,3)   << "\n"
+            << accelGainOffset(2,0) << "," << accelGainOffset(2,1)  << "," << accelGainOffset(2,2)  << "," << accelGainOffset(2,3)  << ","
+            << gyroGainOffset(2,0)  << "," << gyroGainOffset(2,1)   << "," << gyroGainOffset(2,2)   << "," << gyroGainOffset(2,3)   << "\n";
 
         this->accept();
     }
@@ -177,6 +193,10 @@ Calib::~Calib(){
     accelMeas.release();
     accelReal.release();
     currAccelState.release();
+
+    gyroMeas.release();
+    gyroReal.release();
+    currGyroState.release();
 }
 
 void Calib::printMat(cv::Mat_<double> mat)

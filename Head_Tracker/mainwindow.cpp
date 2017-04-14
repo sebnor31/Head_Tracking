@@ -4,51 +4,150 @@
 
 #include <QDebug>
 #include <QMessageBox>
-#include <QDir>
+#include <QFile>
+#include <QTextStream>
 
 
 MainWindow::MainWindow(QWidget *parent) : QMainWindow(parent), ui(new Ui::MainWindow)
 {
     ui->setupUi(this);
+    connect(this, &MainWindow::logSig, this, &MainWindow::logMsg);
 
     rsTh = new QThread(this);
     rs = new ReadSensor();
     rs->moveToThread(rsTh);
 
     connect(rsTh, &QThread::started, rs, &ReadSensor::start);
-    connect(rs, &ReadSensor::newDataSig, this, &MainWindow::updatePlot);
+    connect(rs, &ReadSensor::newDataSig, this, &MainWindow::processData);
+    connect(this, &MainWindow::procDataSig, this, &MainWindow::updatePlot);
     connect(rs, &ReadSensor::logSig, this, &MainWindow::logMsg);
     connect(this, &MainWindow::finished, rs, &ReadSensor::stop, Qt::DirectConnection);
     connect(rsTh, &QThread::finished, rsTh, &QThread::deleteLater);
     connect(rsTh, &QThread::finished, rs, &ReadSensor::deleteLater);
 
     rsTh->start();
-
     setPlot();
+
+    accelGain   = cv::Matx33d::eye();
+    gyroGain    = cv::Matx33d::eye();
+    accelOffset = cv::Matx31d::zeros();
+    gyroOffset  = cv::Matx31d::zeros();
 }
 
 void MainWindow::logMsg(QString msg){
     ui->logger->appendPlainText(msg);
 }
 
-void MainWindow::closeEvent(QCloseEvent *event){
-    event->ignore();
-    emit finished();
+void MainWindow::processData(SensorData data)
+{
+    // Calibrate scaled accelerometer values
+    cv::Matx31d accelMeas;
+    accelMeas(0) = data.accelX;
+    accelMeas(1) = data.accelY;
+    accelMeas(2) = data.accelZ;
+    cv::Matx31d calibAccel = accelGain * accelMeas + accelOffset;
 
-    rsTh->quit();
-    rsTh->wait();
+    // Calibrate scaled gyro values
+    cv::Matx31d gyroMeas;
+    gyroMeas(0) = data.gyroX;
+    gyroMeas(1) = data.gyroY;
+    gyroMeas(2) = data.gyroZ;
+    cv::Matx31d calibGyro = gyroGain * gyroMeas + gyroOffset;
 
-//    int userResp = QMessageBox::question(this, "Close Confirmation?", "Are you sure you want to exit?", QMessageBox::Yes|QMessageBox::No);
+    // Send back a calibrated signal
+    data.accelX = calibAccel(0);
+    data.accelY = calibAccel(1);
+    data.accelZ = calibAccel(2);
 
-//    if (QMessageBox::Yes == userResp){
-//        event->accept();
-//    }
-    event->accept();
+    data.gyroX = calibGyro(0);
+    data.gyroY = calibGyro(1);
+    data.gyroZ = calibGyro(2);
+
+    emit procDataSig(data);
 }
 
-MainWindow::~MainWindow()
+void MainWindow::on_deviceIdCombo_currentIndexChanged(int index)
 {
-    delete ui;
+    emit logSig("Loading Calibration parameters.......");
+    QString calibPath = QString("%1/calib_%2.txt").arg(QCoreApplication::applicationDirPath()).arg(index);
+    QFile calibFile(calibPath);
+    QTextStream stream(&calibFile);
+
+    if (!calibFile.open(QIODevice::ReadOnly | QIODevice::Text)) {
+        QString msg = "Could not read the calib file located in:\n" + calibPath;
+        emit QMessageBox::critical(this, "Open File Error", msg);
+        return;
+    }
+
+    // Read calib to temporary matrices in case of read errors occurring
+    // so instance variables would only be updated if loading is a success
+    cv::Matx33d _accelGain   = cv::Matx33d::zeros();
+    cv::Matx33d _gyroGain   = cv::Matx33d::zeros();
+    cv::Matx31d _accelOffset = cv::Matx31d::zeros();
+    cv::Matx31d _gyroOffset = cv::Matx31d::zeros();
+
+    int rowIdx = 0;
+    bool abort = false;
+
+    while(!stream.atEnd()) {
+
+        if (rowIdx == 3) {
+            QString msg = "Abort: More rows than expected in the calib file:\n" + calibPath;
+            emit QMessageBox::critical(this, "Corrupted File", msg);
+            abort = true;
+            break;
+        }
+
+        QStringList row = stream.readLine().split(",");
+
+        if (row.size() != 0 && row.size() != 8) {
+            QString msg = "Abort: The following calib file is corrupted:\n" + calibPath;
+            emit QMessageBox::critical(this, "Corrupted File", msg);
+            abort = true;
+            break;
+        }
+        else if (row.size() == 8){
+            _accelGain(rowIdx,0) = ((QString)row[0]).toDouble();
+            _accelGain(rowIdx,1) = ((QString)row[1]).toDouble();
+            _accelGain(rowIdx,2) = ((QString)row[2]).toDouble();
+            _accelOffset(rowIdx) = ((QString)row[3]).toDouble();
+
+            _gyroGain(rowIdx,0) = ((QString)row[4]).toDouble();
+            _gyroGain(rowIdx,1) = ((QString)row[5]).toDouble();
+            _gyroGain(rowIdx,2) = ((QString)row[6]).toDouble();
+            _gyroOffset(rowIdx) = ((QString)row[7]).toDouble();
+            rowIdx++;
+        }
+    }
+
+    calibFile.close();
+
+    if (!abort) {
+        accelGain   = _accelGain;
+        accelOffset = _accelOffset;
+
+        gyroGain   = _gyroGain;
+        gyroOffset = _gyroOffset;
+
+        QString accelGainLog = "\nAccel Gain:\n" + printMat(cv::Mat(accelGain));
+        emit logSig(accelGainLog);
+
+        QString accelOffsetLog = "Accel Offset:" + printMat(cv::Mat(accelOffset.t())); // Make it read in 1 row
+        emit logSig(accelOffsetLog);
+
+        QString gyroGainLog = "\nGyro Gain:\n" + printMat(cv::Mat(gyroGain));
+        emit logSig(gyroGainLog);
+
+        QString gyroOffsetLog = "Gyro Offset:" + printMat(cv::Mat(gyroOffset.t())); // Make it read in 1 row
+        emit logSig(gyroOffsetLog);
+    }
+}
+
+void MainWindow::on_calibBtn_clicked()
+{
+    Calib calib(rs, this);
+    connect(&calib, &Calib::logSig, this, &MainWindow::logMsg);
+    calib.exec();
 }
 
 void MainWindow::setPlot()
@@ -135,9 +234,31 @@ void MainWindow::updatePlot(SensorData data)
 
 }
 
-void MainWindow::on_calibBtn_clicked()
+QString MainWindow::printMat(cv::Mat mat)
 {
-    Calib calib(rs, this);
-    connect(&calib, &Calib::logSig, this, &MainWindow::logMsg);
-    calib.exec();
+    QString out = "";
+
+    for (int i = 0; i < mat.rows; i++) {
+
+        for (int j = 0; j < mat.cols; j++){
+            out += QString::number(mat.at<double>(i,j)) + " ";
+        }
+
+        out += "\n";
+    }
+    out += "\n";
+    return out;
+}
+
+void MainWindow::closeEvent(QCloseEvent *event){
+    event->ignore();
+    emit finished();
+    rsTh->quit();
+    rsTh->wait();
+    event->accept();
+}
+
+MainWindow::~MainWindow()
+{
+    delete ui;
 }

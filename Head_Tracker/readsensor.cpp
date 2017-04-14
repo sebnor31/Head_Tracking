@@ -7,7 +7,6 @@ ReadSensor::ReadSensor(QObject *parent) : QObject(parent)
 {
 }
 
-
 void ReadSensor::start()
 {
     // Connect to Mojo by identifying its COM Port
@@ -68,7 +67,7 @@ void ReadSensor::start()
             continue;
         }
 
-        bool readAvail = sp->waitForReadyRead(1000);
+        bool readAvail = sp->waitForReadyRead(10000);
 
         if (!readAvail){
             emit logSig("TIMEOUT: No data to read");
@@ -121,14 +120,12 @@ void ReadSensor::start()
         }
 
         // Read sensor values
-        bool dataAvail = true;
         QByteArray data = sp->read(NUM_READ_BYTES);
 
-        if (!dataAvail || (data.size() < NUM_READ_BYTES) ){
+        if (data.size() < NUM_READ_BYTES){
             sp->clear();
-            QString errMsg = QString("WARNING: Could not read sensor data: Avail=%1 - Size=%2").arg(dataAvail).arg(data.size());
+            QString errMsg = QString("WARNING: Incomplete pkt received: %1 bytes").arg(data.size());
             emit logSig(errMsg);
-
             continue;
         }
 
@@ -164,11 +161,6 @@ void ReadSensor::start()
         sensorData.pktCnter = pktCnter;
         sensorData.time = (QDateTime::currentMSecsSinceEpoch() - basetime) / 1000.0;
         emit newDataSig(sensorData);
-
-//        emit logSig(QString("Pkt %7 (%8): Accel [ %1 %2 %3 ] - Gyro [ %4 %5 %6 ]")
-//                    .arg(accelX).arg(accelY).arg(accelZ)
-//                    .arg(gyroX).arg(gyroY).arg(gyroZ)
-//                    .arg(pktCnter).arg(sensorData.time));
     }
 }
 

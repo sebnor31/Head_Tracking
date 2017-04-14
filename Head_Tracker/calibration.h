@@ -26,6 +26,9 @@ private:
     cv::Mat_<double> accelReal;
     cv::Mat_<double> currAccelState;
 
+    cv::Mat_<double> gyroMeas;
+    cv::Mat_<double> gyroReal;
+    cv::Mat_<double> currGyroState;
 
 public:
     explicit Calib(ReadSensor *rs, QWidget *parent = 0);

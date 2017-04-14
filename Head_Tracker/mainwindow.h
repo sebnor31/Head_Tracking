@@ -6,6 +6,8 @@
 #include "readsensor.h"
 #include "qcustomplot.h"
 #include "typedef.h"
+#include <opencv2/core/matx.hpp>
+#include <opencv2/core/mat.hpp>
 
 namespace Ui {
 class MainWindow;
@@ -22,6 +24,10 @@ private:
     Ui::MainWindow *ui;
     QThread *rsTh;
     ReadSensor *rs;
+    cv::Matx33d accelGain;
+    cv::Matx31d accelOffset;
+    cv::Matx33d gyroGain;
+    cv::Matx31d gyroOffset;
 
     struct DataPlot {
         QCPGraph *graph;
@@ -44,14 +50,18 @@ public:
 
 private:
     void setPlot();
+    QString printMat(cv::Mat mat);
 
 private slots:
+    void processData(SensorData data);
     void updatePlot(SensorData data);
     void logMsg(QString msg);
     void on_calibBtn_clicked();
+    void on_deviceIdCombo_currentIndexChanged(int index);
 
 signals:
     void logSig(QString);
+    void procDataSig(SensorData);
     void finished();
 };
 

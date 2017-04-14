@@ -14,7 +14,7 @@
    <string>MainWindow</string>
   </property>
   <widget class="QWidget" name="centralWidget">
-   <layout class="QVBoxLayout" name="verticalLayout" stretch="5,1">
+   <layout class="QVBoxLayout" name="verticalLayout" stretch="5,0">
     <item>
      <widget class="QCustomPlot" name="sensorPlot" native="true">
       <property name="autoFillBackground">
@@ -23,22 +23,70 @@
      </widget>
     </item>
     <item>
-     <layout class="QHBoxLayout" name="horizontalLayout">
+     <layout class="QHBoxLayout" name="horizontalLayout" stretch="10,1">
       <item>
        <widget class="QPlainTextEdit" name="logger"/>
       </item>
       <item>
-       <widget class="QPushButton" name="calibBtn">
-        <property name="sizePolicy">
-         <sizepolicy hsizetype="Minimum" vsizetype="Preferred">
-          <horstretch>0</horstretch>
-          <verstretch>0</verstretch>
-         </sizepolicy>
-        </property>
-        <property name="text">
-         <string>Calibration</string>
-        </property>
-       </widget>
+       <layout class="QVBoxLayout" name="verticalLayout_2" stretch="1,1,2,4">
+        <item>
+         <widget class="QLabel" name="deviceIdLbl">
+          <property name="text">
+           <string>Device ID</string>
+          </property>
+         </widget>
+        </item>
+        <item>
+         <widget class="QComboBox" name="deviceIdCombo">
+          <item>
+           <property name="text">
+            <string>Raw Data</string>
+           </property>
+          </item>
+          <item>
+           <property name="text">
+            <string>TDS-01</string>
+           </property>
+          </item>
+          <item>
+           <property name="text">
+            <string>TDS-02</string>
+           </property>
+          </item>
+          <item>
+           <property name="text">
+            <string>TDS-03</string>
+           </property>
+          </item>
+         </widget>
+        </item>
+        <item>
+         <spacer name="verticalSpacer">
+          <property name="orientation">
+           <enum>Qt::Vertical</enum>
+          </property>
+          <property name="sizeHint" stdset="0">
+           <size>
+            <width>20</width>
+            <height>40</height>
+           </size>
+          </property>
+         </spacer>
+        </item>
+        <item>
+         <widget class="QPushButton" name="calibBtn">
+          <property name="sizePolicy">
+           <sizepolicy hsizetype="Minimum" vsizetype="Preferred">
+            <horstretch>0</horstretch>
+            <verstretch>0</verstretch>
+           </sizepolicy>
+          </property>
+          <property name="text">
+           <string>Calibration</string>
+          </property>
+         </widget>
+        </item>
+       </layout>
       </item>
      </layout>
     </item>
