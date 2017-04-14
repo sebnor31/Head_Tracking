@@ -48,9 +48,7 @@ private:
 private slots:
     void updatePlot(SensorData data);
     void logMsg(QString msg);
-
     void on_calibBtn_clicked();
-    void calibDone();
 
 signals:
     void logSig(QString);

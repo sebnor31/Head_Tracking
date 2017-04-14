@@ -15,7 +15,7 @@ void ReadSensor::start()
     QList<QSerialPortInfo> listOfPorts = QSerialPortInfo::availablePorts();
 
     foreach(QSerialPortInfo port, listOfPorts) {
-        emit logSig(QString("PID: %1 - Manuf: %2").arg(port.productIdentifier()).arg(port.manufacturer()));
+
         if (port.productIdentifier() == 24577) {
             sp = new QSerialPort(port, this);
             portFound = true;

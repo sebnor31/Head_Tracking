@@ -1,34 +1,53 @@
 #ifndef CALIBRATION_H
 #define CALIBRATION_H
 
-#include <QObject>
+#include <QDialog>
 #include "typedef.h"
 #include "readsensor.h"
+#include <opencv2/core.hpp>
+#include <opencv2/core/mat.hpp>
 
-class Calib : public QObject
+namespace Ui {
+class CalibDlg;
+}
+
+class Calib : public QDialog
 {
     Q_OBJECT
 
 private:
+    Ui::CalibDlg *ui;
     ReadSensor *rs;
     quint16 numSamples;
     quint16 cnter;
-    QString calibFn;
-    SensorData calibData;
+    qint32 colIdx;
+
+    cv::Mat_<double> accelMeas;
+    cv::Mat_<double> accelReal;
+    cv::Mat_<double> currAccelState;
+
 
 public:
-    explicit Calib(ReadSensor *rs, QString calibFn, QObject *parent = 0);
-
-public slots:
-    void start();
+    explicit Calib(ReadSensor *rs, QWidget *parent = 0);
+    ~Calib();
 
 private slots:
     void processData(SensorData data);
-    void saveCalib();
+    void on_cancelBtn_clicked();
+    void on_saveBtn_clicked();
+    void on_zDownBtn_clicked();
+    void on_zUpBtn_clicked();
+    void on_yDownBtn_clicked();
+    void on_yUpBtn_clicked();
+    void on_xUpBtn_clicked();
+    void on_xDownBtn_clicked();
+
+private:
+    void startRecording();
+    void printMat(cv::Mat_<double> mat);
 
 signals:
     void logSig(QString);
-    void finished();
 };
 
 #endif // CALIBRATION_H

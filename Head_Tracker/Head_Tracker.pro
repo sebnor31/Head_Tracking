@@ -21,4 +21,12 @@ HEADERS  += mainwindow.h \
     typedef.h \
     calibration.h
 
-FORMS    += mainwindow.ui
+FORMS    += mainwindow.ui \
+    calibration.ui
+
+
+# OPEN CV
+INCLUDEPATH += "C:/dev/OpenCV/OpenCV_3_0/opencv/build/include"
+LIBS        += -L"C:/dev/OpenCV/OpenCV_3_0/Build_Shared_64bit/lib/Release" \
+                -lopencv_core300
+
