@@ -10,6 +10,9 @@ struct SensorData{
     double gyroX;
     double gyroY;
     double gyroZ;
+    double magX;
+    double magY;
+    double magZ;
     double time;
     quint8 pktCnter;
 };

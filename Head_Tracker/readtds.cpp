@@ -1,13 +1,13 @@
-#include "readsensor.h"
+#include "readtds.h"
 #include <QtMath>
 #include <QDateTime>
 #include <QThread>
 
-ReadSensor::ReadSensor(QObject *parent) : QObject(parent)
+ReadTds::ReadTds(QObject *parent) : QObject(parent)
 {
 }
 
-void ReadSensor::start()
+void ReadTds::start()
 {
     // Connect to Mojo by identifying its COM Port
     bool portFound = false;
@@ -164,7 +164,7 @@ void ReadSensor::start()
     }
 }
 
-void ReadSensor::checkError(bool settingSuccess)
+void ReadTds::checkError(bool settingSuccess)
 {
     if (!settingSuccess){
         QString errMsg = QString("ERROR: Something went wrong with the receiver.\n\tDesc: %1\n\tCode: %2").arg(sp->errorString()).arg(sp->error());
@@ -173,14 +173,14 @@ void ReadSensor::checkError(bool settingSuccess)
     }
 }
 
-void ReadSensor::stop()
+void ReadTds::stop()
 {
     mutex.lock();
     stopCond = true;
     mutex.unlock();
 }
 
-ReadSensor::~ReadSensor()
+ReadTds::~ReadTds()
 {
     if (sp != NULL){
         sp->close();

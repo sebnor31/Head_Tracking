@@ -8,7 +8,7 @@
 #include <QMutex>
 #include "typedef.h"
 
-class ReadSensor : public QObject
+class ReadTds : public QObject
 {
     Q_OBJECT
 
@@ -19,8 +19,8 @@ private:
     const qint64 NUM_READ_BYTES = 28;
 
 public:
-    explicit ReadSensor(QObject *parent = 0);
-    ~ReadSensor();
+    explicit ReadTds(QObject *parent = 0);
+    ~ReadTds();
 
 public slots:
     void start();

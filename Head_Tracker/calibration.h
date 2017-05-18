@@ -3,7 +3,7 @@
 
 #include <QDialog>
 #include "typedef.h"
-#include "readsensor.h"
+#include "readtds.h"
 #include <opencv2/core.hpp>
 #include <opencv2/core/mat.hpp>
 
@@ -17,7 +17,7 @@ class Calib : public QDialog
 
 private:
     Ui::CalibDlg *ui;
-    ReadSensor *rs;
+    ReadTds *rs;
     quint16 numSamples;
     quint16 cnter;
     qint32 colIdx;
@@ -31,7 +31,7 @@ private:
     cv::Mat_<double> currGyroState;
 
 public:
-    explicit Calib(ReadSensor *rs, QWidget *parent = 0);
+    explicit Calib(ReadTds *rs, QWidget *parent = 0);
     ~Calib();
 
 private slots:

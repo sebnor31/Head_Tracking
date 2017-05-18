@@ -4,22 +4,24 @@
 #
 #-------------------------------------------------
 
-QT       += core gui widgets serialport printsupport
+QT       += core gui network widgets serialport printsupport
 
 TARGET = Head_Tracker
 TEMPLATE = app
 
 SOURCES += main.cpp\
         mainwindow.cpp \
-    readsensor.cpp \
     qcustomplot.cpp \
-    calibration.cpp
+    calibration.cpp \
+    readtds.cpp \
+    readimupi.cpp
 
 HEADERS  += mainwindow.h \
-    readsensor.h \
     qcustomplot.h \
     typedef.h \
-    calibration.h
+    calibration.h \
+    readtds.h \
+    readimupi.h
 
 FORMS    += mainwindow.ui \
     calibration.ui

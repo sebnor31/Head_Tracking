@@ -7,7 +7,7 @@
 
 using namespace cv;
 
-Calib::Calib(ReadSensor *rs, QWidget *parent) : QDialog(parent), ui(new Ui::CalibDlg)
+Calib::Calib(ReadTds *rs, QWidget *parent) : QDialog(parent), ui(new Ui::CalibDlg)
 {
     ui->setupUi(this);
 
@@ -99,7 +99,7 @@ void Calib::startRecording()
 {
     cnter = numSamples;
     ui->recordLed->setStyleSheet("background-color: red");  // Set LED to red to indicate recording in-progress
-    connect(rs, &ReadSensor::newDataSig, this, &Calib::processData);
+    connect(rs, &ReadTds::newDataSig, this, &Calib::processData);
 }
 
 void Calib::processData(SensorData data)
@@ -119,7 +119,7 @@ void Calib::processData(SensorData data)
     cnter--;
 
     if (cnter == 0){
-        disconnect(rs, &ReadSensor::newDataSig, this, &Calib::processData);
+        disconnect(rs, &ReadTds::newDataSig, this, &Calib::processData);
         ui->recordLed->setStyleSheet("background-color: rgb(0, 255, 127)"); // Set LED back to green to indicate readiness for another point
 
         // Verify if all points have been recorded

@@ -3,7 +3,7 @@
 
 #include <QMainWindow>
 #include <QThread>
-#include "readsensor.h"
+#include "readimupi.h"
 #include "qcustomplot.h"
 #include "typedef.h"
 #include <opencv2/core/matx.hpp>
@@ -23,21 +23,24 @@ class MainWindow : public QMainWindow
 private:
     Ui::MainWindow *ui;
     QThread *rsTh;
-    ReadSensor *rs;
+    readImuPi *rs;
     cv::Matx33d accelGain;
     cv::Matx31d accelOffset;
     cv::Matx33d gyroGain;
     cv::Matx31d gyroOffset;
+    cv::Matx33d magGain;
+    cv::Matx31d magOffset;
 
     struct DataPlot {
-        QCPGraph *graph;
+        QCPGraph    *graph;
         QCPAxisRect *axis;
-        QCPRange *timeRange;
-        QCPRange *YRange;
+        QCPRange    *timeRange;
+        QCPRange    *YRange;
     };
 
     DataPlot accelPlot[3];
     DataPlot gyroPlot [3];
+    DataPlot magPlot [3];
 
 
 /*****************
