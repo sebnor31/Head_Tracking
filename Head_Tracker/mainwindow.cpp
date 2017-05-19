@@ -217,7 +217,7 @@ void MainWindow::setPlot()
         accelLay->addElement(0, i, accelPlot[i].axis);
 
         accelPlot[i].timeRange = new QCPRange(0,5);
-        accelPlot[i].YRange    = new QCPRange(-32770,32770);//(-2, 2)
+        accelPlot[i].YRange    = new QCPRange(-3,3); // Max range = 2G
         accelPlot[i].axis->axis(QCPAxis::atBottom)->setRange(*accelPlot[i].timeRange);
         accelPlot[i].axis->axis(QCPAxis::atLeft)->setRange(*accelPlot[i].YRange);
         accelPlot[i].axis->axis(QCPAxis::atRight)->setRange(*accelPlot[i].YRange);
@@ -233,7 +233,7 @@ void MainWindow::setPlot()
         gyroLay->addElement(0, i, gyroPlot[i].axis);
 
         gyroPlot[i].timeRange = new QCPRange(0,5);
-        gyroPlot[i].YRange    = new QCPRange(-32770,32770);//(-300, 300)
+        gyroPlot[i].YRange    = new QCPRange(-250,250); // Max range = 245 deg/s
         gyroPlot[i].axis->axis(QCPAxis::atBottom)->setRange(*gyroPlot[i].timeRange);
         gyroPlot[i].axis->axis(QCPAxis::atLeft)->setRange(*gyroPlot[i].YRange);
         gyroPlot[i].axis->axis(QCPAxis::atRight)->setRange(*gyroPlot[i].YRange);
@@ -249,7 +249,7 @@ void MainWindow::setPlot()
         magLay->addElement(0, i, magPlot[i].axis);
 
         magPlot[i].timeRange = new QCPRange(0,5);
-        magPlot[i].YRange    = new QCPRange(-32770,32770);
+        magPlot[i].YRange    = new QCPRange(-5,5);  // Max range = 4 gauss
         magPlot[i].axis->axis(QCPAxis::atBottom)->setRange(*magPlot[i].timeRange);
         magPlot[i].axis->axis(QCPAxis::atLeft)->setRange(*magPlot[i].YRange);
         magPlot[i].axis->axis(QCPAxis::atRight)->setRange(*magPlot[i].YRange);

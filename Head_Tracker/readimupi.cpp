@@ -60,36 +60,36 @@ void readImuPi::dataReceive(QNetworkReply *reply)
         int rawAccelY = accelArray.at(1).toInt();
         int rawAccelZ = accelArray.at(2).toInt();
 
-//        double accelX = 2.0 * (rawAccelX - 32768) / 32768.0;
-//        double accelY = 2.0 * (rawAccelY - 32768) / 32768.0;
-//        double accelZ = 2.0 * (rawAccelZ - 32768) / 32768.0;
-        double accelX = rawAccelX;
-        double accelY = rawAccelY;
-        double accelZ = rawAccelZ;
+        double accelX = 2.0 * (rawAccelX) / 32768.0;
+        double accelY = 2.0 * (rawAccelY) / 32768.0;
+        double accelZ = 2.0 * (rawAccelZ) / 32768.0;
+//        double accelX = rawAccelX;
+//        double accelY = rawAccelY;
+//        double accelZ = rawAccelZ;
 
         // gyroscope
         int rawGyroX = gyroArray.at(0).toInt();
         int rawGyroY = gyroArray.at(1).toInt();
         int rawGyroZ = gyroArray.at(2).toInt();
 
-//        double gyroX = 250.0 * (rawGyroX - 32768) / 32768.0;
-//        double gyroY = 250.0 * (rawGyroY - 32768) / 32768.0;
-//        double gyroZ = 250.0 * (rawGyroZ - 32768) / 32768.0;
-        double gyroX = rawGyroX;
-        double gyroY = rawGyroY;
-        double gyroZ = rawGyroZ;
+        double gyroX = 245.0 * (rawGyroX) / 32768.0;
+        double gyroY = 245.0 * (rawGyroY) / 32768.0;
+        double gyroZ = 245.0 * (rawGyroZ) / 32768.0;
+//        double gyroX = rawGyroX;
+//        double gyroY = rawGyroY;
+//        double gyroZ = rawGyroZ;
 
         // magnetometer
         int rawMagX = magArray.at(0).toInt();
         int rawMagY = magArray.at(1).toInt();
         int rawMagZ = magArray.at(2).toInt();
 
-//        double gyroX = 250.0 * (rawGyroX - 32768) / 32768.0;
-//        double gyroY = 250.0 * (rawGyroY - 32768) / 32768.0;
-//        double gyroZ = 250.0 * (rawGyroZ - 32768) / 32768.0;
-        double magX = rawMagX;
-        double magY = rawMagY;
-        double magZ = rawMagZ;
+        double magX = 4.0 * (rawMagX) / 32768.0;
+        double magY = 4.0 * (rawMagY) / 32768.0;
+        double magZ = 4.0 * (rawMagZ) / 32768.0;
+//        double magX = rawMagX;
+//        double magY = rawMagY;
+//        double magZ = rawMagZ;
 
         // Display normalized values
         if (firstData) {
